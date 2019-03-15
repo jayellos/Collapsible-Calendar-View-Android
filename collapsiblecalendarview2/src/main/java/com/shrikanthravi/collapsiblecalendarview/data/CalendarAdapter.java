@@ -1,12 +1,15 @@
 package com.shrikanthravi.collapsiblecalendarview.data;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jakewharton.threetenabp.AndroidThreeTen;
 import com.shrikanthravi.collapsiblecalendarview.R;
 import com.shrikanthravi.collapsiblecalendarview.widget.UICalendar;
 
@@ -24,16 +27,20 @@ import static org.threeten.bp.Month.JANUARY;
  */
 
 public class CalendarAdapter {
-    private DayOfWeek      mFirstDayOfWeek = DayOfWeek.MONDAY;
-    private LocalDate      mCal;
+    private Context context;
+    private DayOfWeek mFirstDayOfWeek = DayOfWeek.SUNDAY;
+    private LocalDate mCal;
     private LayoutInflater mInflater;
-    private int            mEventDotSize   = UICalendar.EVENT_DOT_BIG;
+    private int mEventDotSize = UICalendar.EVENT_DOT_BIG;
 
-    private List<LocalDate> mItemList  = new ArrayList<>();
-    private List<View>      mViewList  = new ArrayList<>();
-    private List<Event>     mEventList = new ArrayList<>();
+    private List<LocalDate> mItemList = new ArrayList<>();
+    private List<View> mViewList = new ArrayList<>();
+    private List<Event> mEventList = new ArrayList<>();
 
     public CalendarAdapter(Context context) {
+        AndroidThreeTen.init(context);
+
+        this.context = context;
         this.mCal = LocalDate.now().withDayOfMonth(1);
         mInflater = LayoutInflater.from(context);
 
@@ -97,8 +104,10 @@ public class CalendarAdapter {
 
         // generate day list
         int offset = 0 - (firstDayOfWeek.getValue() - mFirstDayOfWeek.getValue());
-        if (offset > 0) offset += -7;
-        int length = (int) Math.ceil((float) (lastDayOfMonth - offset) / 7) * 7;
+        if (offset > 0) offset += -6;
+
+        int length = (int) Math.ceil((float) (lastDayOfMonth - offset + 1) / 7) * 7;
+
         for (int i = offset; i < length + offset; i++) {
             int numYear;
             int numMonth;
@@ -120,7 +129,7 @@ public class CalendarAdapter {
                     numMonth = JANUARY.getValue();
                 } else {
                     numYear = year;
-                    numMonth = month;
+                    numMonth = month + 1;
                 }
                 numDay = i - lastDayOfMonth;
             } else {
@@ -137,6 +146,9 @@ public class CalendarAdapter {
                 view = mInflater.inflate(R.layout.day_layout, null);
             }
 
+//            if(i %2 == 0){
+//                view.setBackgroundColor(Color.GREEN);
+//            }
             TextView txtDay = view.findViewById(R.id.txt_day);
             ImageView imgEventTag = view.findViewById(R.id.img_event_tag);
 
@@ -149,12 +161,19 @@ public class CalendarAdapter {
                 Event event = mEventList.get(j);
                 if (day.equals(event.getDate())) {
                     imgEventTag.setVisibility(View.VISIBLE);
-                    imgEventTag.setColorFilter(event.getColor(), PorterDuff.Mode.SRC_ATOP);
+//                    imgEventTag.setColorFilter(event.getColor(), PorterDuff.Mode.SRC_ATOP);
                 }
             }
 
             mItemList.add(day);
             mViewList.add(view);
         }
+    }
+
+    private int dpToPx(int dp) {
+        float scale = context.getResources().getDisplayMetrics().density;
+        int px = (int) (dp * scale + 0.5f);
+
+        return px;
     }
 }

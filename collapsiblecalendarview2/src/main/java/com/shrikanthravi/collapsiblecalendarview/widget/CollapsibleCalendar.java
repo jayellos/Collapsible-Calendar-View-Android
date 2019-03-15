@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -18,6 +19,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.jakewharton.threetenabp.AndroidThreeTen;
 import com.shrikanthravi.collapsiblecalendarview.R;
 import com.shrikanthravi.collapsiblecalendarview.data.CalendarAdapter;
 import com.shrikanthravi.collapsiblecalendarview.data.Event;
@@ -31,17 +33,18 @@ import androidx.annotation.NonNull;
 
 public class CollapsibleCalendar extends UICalendar {
 
-    private CalendarAdapter  mAdapter;
+    private CalendarAdapter mAdapter;
     private CalendarListener mListener;
 
     private boolean expanded = false;
 
     private int mInitHeight = 0;
 
-    private Handler mHandler            = new Handler();
+    private Handler mHandler = new Handler();
     private boolean mIsWaitingForUpdate = false;
 
     private int mCurrentWeekIndex;
+    private boolean expandable = true;
 
     public CollapsibleCalendar(Context context) {
         super(context);
@@ -68,63 +71,39 @@ public class CollapsibleCalendar extends UICalendar {
 
         // bind events
         mLayoutRoot.setOnTouchListener(getSwipeTouchListener());
-        mBtnPrevMonth.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                prevMonth();
-            }
-        });
-
-        mBtnNextMonth.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                nextMonth();
-            }
-        });
-
-        mBtnPrevWeek.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                prevWeek();
-            }
-        });
-
-        mBtnNextWeek.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                nextWeek();
-            }
-        });
-
+        mBtnPrevMonth.setOnClickListener(v -> prevMonth());
+        mBtnNextMonth.setOnClickListener(v -> nextMonth());
+        mBtnPrevWeek.setOnClickListener(v -> prevWeek());
+        mBtnNextWeek.setOnClickListener(v -> nextWeek());
         expandIconView.setState(ExpandIconView.MORE, true);
-
-
-        expandIconView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (expanded) {
-                    collapse(400);
-                } else {
-                    expand(400);
-                }
+        expandIconViewTop.setState(ExpandIconView.MORE, true);
+        expandIconView.setOnClickListener(view -> {
+            if (expanded) {
+                collapse(400);
+            } else {
+                expand(400);
             }
         });
+        expandIconViewTop.setOnClickListener(view -> {
 
-        this.post(new Runnable() {
-            @Override
-            public void run() {
-                collapseTo(mCurrentWeekIndex);
+            if (!expandable) {
+                return;
+            }
+
+            if (expanded) {
+                collapse(400);
+            } else {
+                expand(400);
             }
         });
-
-
+        this.post(() -> collapseTo(mCurrentWeekIndex));
     }
+
 
     private OnSwipeTouchListener getSwipeTouchListener() {
         return new OnSwipeTouchListener(getContext()) {
             public void onSwipeTop() {
                 collapse(400);
-
             }
 
             public void onSwipeLeft() {
@@ -158,12 +137,7 @@ public class CollapsibleCalendar extends UICalendar {
 
         if (mIsWaitingForUpdate) {
             redraw();
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    collapseTo(mCurrentWeekIndex);
-                }
-            });
+            mHandler.post(() -> collapseTo(mCurrentWeekIndex));
             mIsWaitingForUpdate = false;
             if (mListener != null) {
                 mListener.onDataUpdate();
@@ -184,13 +158,16 @@ public class CollapsibleCalendar extends UICalendar {
         if (mAdapter != null) {
             for (int i = 0; i < mAdapter.getCount(); i++) {
                 LocalDate day = mAdapter.getItem(i);
+
                 View view = mAdapter.getView(i);
                 TextView txtDay = view.findViewById(R.id.txt_day);
                 txtDay.setBackgroundColor(Color.TRANSPARENT);
                 txtDay.setTextColor(getTextColor());
 
+                // TODO [Jay]: here is the bug
                 // set today's item
                 if (isToady(day)) {
+                    Log.e("jay", "istOday:" + day);
                     txtDay.setBackgroundDrawable(getTodayItemBackgroundDrawable());
                     txtDay.setTextColor(getTodayItemTextColor());
                 }
@@ -211,7 +188,7 @@ public class CollapsibleCalendar extends UICalendar {
             mAdapter.refresh();
 
             // reset UI
-            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MMMM YYYY");
+            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MMMM");
             String formattedDate = dateFormat.format(mAdapter.getCalendar());
             mTxtTitle.setText(formattedDate);
             mTableHead.removeAllViews();
@@ -233,9 +210,11 @@ public class CollapsibleCalendar extends UICalendar {
             rowCurrent.setLayoutParams(new TableLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
+
+            // sun mon tue wed thu fri
             for (int i = 0; i < 7; i++) {
                 View view = mInflater.inflate(R.layout.layout_day_of_week, null);
-                TextView txtDayOfWeek = (TextView) view.findViewById(R.id.txt_day_of_week);
+                TextView txtDayOfWeek = view.findViewById(R.id.txt_day_of_week);
                 txtDayOfWeek.setText(dayOfWeekIds[(i + getFirstDayOfWeek().getValue()) % 7]);
                 view.setLayoutParams(new TableRow.LayoutParams(
                         0,
@@ -254,26 +233,35 @@ public class CollapsibleCalendar extends UICalendar {
                     rowCurrent.setLayoutParams(new TableLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                    rowCurrent.setPadding(0, 0, 0, dpToPx(4));
+
                     mTableBody.addView(rowCurrent);
                 }
                 final View view = mAdapter.getView(position);
                 view.setLayoutParams(new TableRow.LayoutParams(
                         0,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        1));
+                        dpToPx(48),
+                        1)
+                );
                 view.setOnTouchListener(getSwipeTouchListener());
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onItemClicked(v, mAdapter.getItem(position));
-                    }
-                });
+                view.setOnClickListener(v -> onItemClicked(v, mAdapter.getItem(position)));
+
+
+
                 rowCurrent.addView(view);
             }
 
             redraw();
             mIsWaitingForUpdate = true;
         }
+    }
+
+    private int dpToPx(int dp) {
+        float scale = getResources().getDisplayMetrics().density;
+        int px = (int) (dp * scale + 0.5f);
+
+        return px;
     }
 
     private int getSuitableRowIndex() {
@@ -298,7 +286,7 @@ public class CollapsibleCalendar extends UICalendar {
         LocalDate cal = mAdapter.getCalendar();
 
         int newYear = day.getYear();
-        int newMonth = day.getMonthValue() - 1;
+        int newMonth = day.getMonthValue();
         int oldYear = cal.getYear();
         int oldMonth = cal.getMonthValue();
         if (newMonth != oldMonth) {
@@ -427,10 +415,12 @@ public class CollapsibleCalendar extends UICalendar {
         if (getState() == STATE_EXPANDED) {
             setState(STATE_PROCESSING);
 
-            mLayoutBtnGroupMonth.setVisibility(GONE);
-            mLayoutBtnGroupWeek.setVisibility(VISIBLE);
-            mBtnPrevWeek.setClickable(false);
-            mBtnNextWeek.setClickable(false);
+            if (showNav) {
+                mLayoutBtnGroupMonth.setVisibility(GONE);
+                mLayoutBtnGroupWeek.setVisibility(VISIBLE);
+                mBtnPrevWeek.setClickable(false);
+                mBtnNextWeek.setClickable(false);
+            }
 
             int index = getSuitableRowIndex();
             mCurrentWeekIndex = index;
@@ -470,6 +460,7 @@ public class CollapsibleCalendar extends UICalendar {
         }
 
         expandIconView.setState(ExpandIconView.MORE, true);
+        expandIconViewTop.setState(ExpandIconView.MORE, true);
     }
 
     private void collapseTo(int index) {
@@ -503,14 +494,24 @@ public class CollapsibleCalendar extends UICalendar {
         }
     }
 
+    public void setExpandable(boolean expandable) {
+        this.expandable = expandable;
+    }
+
     public void expand(int duration) {
+        if (!expandable) {
+            return;
+        }
+
         if (getState() == STATE_COLLAPSED) {
             setState(STATE_PROCESSING);
 
-            mLayoutBtnGroupMonth.setVisibility(VISIBLE);
-            mLayoutBtnGroupWeek.setVisibility(GONE);
-            mBtnPrevMonth.setClickable(false);
-            mBtnNextMonth.setClickable(false);
+            if (showNav) {
+                mLayoutBtnGroupMonth.setVisibility(VISIBLE);
+                mLayoutBtnGroupWeek.setVisibility(GONE);
+                mBtnPrevMonth.setClickable(false);
+                mBtnNextMonth.setClickable(false);
+            }
 
             final int currentHeight = mScrollViewBody.getMeasuredHeight();
             final int targetHeight = mInitHeight;
@@ -537,6 +538,7 @@ public class CollapsibleCalendar extends UICalendar {
         }
 
         expandIconView.setState(ExpandIconView.LESS, true);
+        expandIconViewTop.setState(ExpandIconView.LESS, true);
     }
 
     @Override

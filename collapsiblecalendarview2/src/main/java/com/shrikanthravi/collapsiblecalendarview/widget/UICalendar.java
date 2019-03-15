@@ -47,6 +47,7 @@ public abstract class UICalendar extends LinearLayout {
     protected ImageView mBtnPrevWeek;
     protected ImageView mBtnNextWeek;
     protected ExpandIconView expandIconView;
+    protected ExpandIconView expandIconViewTop;
 
     // Attributes
     private boolean mShowWeek = true;
@@ -78,7 +79,7 @@ public abstract class UICalendar extends LinearLayout {
 
     private int mEventDotSize = EVENT_DOT_BIG;
 
-    private boolean showNav = true;
+    protected boolean showNav = true;
 
     public UICalendar(Context context) {
         this(context, null);
@@ -123,6 +124,7 @@ public abstract class UICalendar extends LinearLayout {
         mBtnPrevWeek = rootView.findViewById(R.id.btn_prev_week);
         mBtnNextWeek = rootView.findViewById(R.id.btn_next_week);
         expandIconView = rootView.findViewById(R.id.expandIcon);
+        expandIconViewTop = rootView.findViewById(R.id.expandIconTop);
     }
 
     protected void setAttributes(TypedArray attrs) {
@@ -199,6 +201,15 @@ public abstract class UICalendar extends LinearLayout {
     public void setExpandIconColor(int color) {
         this.mExpandIconColor = color;
         expandIconView.setColor(color);
+        expandIconViewTop.setColor(color);
+    }
+
+    public void hideBottomExpandIconView() {
+        expandIconView.setVisibility(View.GONE);
+    }
+
+    public void hideTopExpandIconView() {
+        expandIconViewTop.setVisibility(View.GONE);
     }
 
     public boolean isShowWeek() {
@@ -267,7 +278,7 @@ public abstract class UICalendar extends LinearLayout {
         mTxtTitle.setTextColor(mTextColor);
     }
 
-    public void setTitlePosition(int rlAlignment){
+    public void setTitlePosition(int rlAlignment) {
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mTxtTitle.getLayoutParams();
         params.addRule(rlAlignment);
 

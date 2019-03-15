@@ -592,6 +592,8 @@ public class CollapsibleCalendar extends UICalendar {
         void onWeekChange(int position);
     }
 
-
+//    public void setShowNavigation(boolean showNav){
+//        super.setShowNavigation(showNav);
+//    }
 }
 

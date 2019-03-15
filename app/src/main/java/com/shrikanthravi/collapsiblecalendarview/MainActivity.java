@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.RelativeLayout;
 
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar;
 
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
         collapsibleCalendar.addEventTag(today);
         LocalDate tomorrow = today.plusDays(1);
         collapsibleCalendar.addEventTag(tomorrow, Color.BLUE);
+
+        collapsibleCalendar.setTitlePosition(RelativeLayout.ALIGN_PARENT_LEFT);
 
         Log.d("Testing date ", collapsibleCalendar.getSelectedDay().toString());
         collapsibleCalendar.setCalendarListener(new CollapsibleCalendar.CalendarListener() {

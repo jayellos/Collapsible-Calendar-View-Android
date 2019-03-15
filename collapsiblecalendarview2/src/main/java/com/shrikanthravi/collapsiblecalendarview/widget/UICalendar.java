@@ -267,6 +267,13 @@ public abstract class UICalendar extends LinearLayout {
         mTxtTitle.setTextColor(mTextColor);
     }
 
+    public void setTitlePosition(int rlAlignment){
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mTxtTitle.getLayoutParams();
+        params.addRule(rlAlignment);
+
+        mTxtTitle.setLayoutParams(params);
+    }
+
     public int getPrimaryColor() {
         return mPrimaryColor;
     }

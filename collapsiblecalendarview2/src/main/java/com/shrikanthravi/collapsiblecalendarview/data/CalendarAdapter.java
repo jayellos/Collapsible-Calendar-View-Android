@@ -97,13 +97,20 @@ public class CalendarAdapter {
 
         int lastDayOfMonth = mCal.lengthOfMonth();
         DayOfWeek firstDayOfWeek = mCal.getDayOfWeek();
+        boolean offSetToZero = true;
 
         // generate day list
         int offset = 0 - (firstDayOfWeek.getValue() - mFirstDayOfWeek.getValue());
-        if (offset > 0) offset += -6;
+        if (offset > 0) {
+            offSetToZero = false;
+            offset += -6;
+        }
 
         int length = (int) Math.ceil((float) (lastDayOfMonth - offset + 1) / 7) * 7;
 
+        if (offset == 0 && offSetToZero) {
+            offset++;
+        }
         for (int i = offset; i < length + offset; i++) {
             int numYear;
             int numMonth;
@@ -142,9 +149,6 @@ public class CalendarAdapter {
                 view = mInflater.inflate(R.layout.day_layout, null);
             }
 
-//            if(i %2 == 0){
-//                view.setBackgroundColor(Color.GREEN);
-//            }
             TextView txtDay = view.findViewById(R.id.txt_day);
             ImageView imgEventTag = view.findViewById(R.id.img_event_tag);
 
@@ -157,7 +161,6 @@ public class CalendarAdapter {
                 Event event = mEventList.get(j);
                 if (day.equals(event.getDate())) {
                     imgEventTag.setVisibility(View.VISIBLE);
-//                    imgEventTag.setColorFilter(event.getColor(), PorterDuff.Mode.SRC_ATOP);
                 }
             }
 

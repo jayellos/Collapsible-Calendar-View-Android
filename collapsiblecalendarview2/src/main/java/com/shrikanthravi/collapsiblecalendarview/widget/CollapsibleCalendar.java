@@ -65,7 +65,6 @@ public class CollapsibleCalendar extends UICalendar {
         CalendarAdapter adapter = new CalendarAdapter(context);
         setAdapter(adapter);
 
-
         // bind events
         mLayoutRoot.setOnTouchListener(getSwipeTouchListener());
         mBtnPrevMonth.setOnClickListener(v -> prevMonth());
@@ -95,7 +94,6 @@ public class CollapsibleCalendar extends UICalendar {
         });
         this.post(() -> collapseTo(mCurrentWeekIndex));
     }
-
 
     private OnSwipeTouchListener getSwipeTouchListener() {
         return new OnSwipeTouchListener(getContext()) {
@@ -161,7 +159,6 @@ public class CollapsibleCalendar extends UICalendar {
                 txtDay.setBackgroundColor(Color.TRANSPARENT);
                 txtDay.setTextColor(getTextColor());
 
-                // TODO [Jay]: here is the bug
                 // set today's item
                 if (isToady(day)) {
                     txtDay.setBackgroundDrawable(getTodayItemBackgroundDrawable());
@@ -241,8 +238,6 @@ public class CollapsibleCalendar extends UICalendar {
                 );
                 view.setOnTouchListener(getSwipeTouchListener());
                 view.setOnClickListener(v -> onItemClicked(v, mAdapter.getItem(position)));
-
-
 
                 rowCurrent.addView(view);
             }
@@ -475,13 +470,8 @@ public class CollapsibleCalendar extends UICalendar {
             mScrollViewBody.getLayoutParams().height = targetHeight;
             mScrollViewBody.requestLayout();
 
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mScrollViewBody.smoothScrollTo(0, topHeight);
-                }
-            });
-
+//            mHandler.post(() -> mScrollViewBody.smoothScrollTo(0, topHeight));
+            mHandler.post(() -> mScrollViewBody.scrollTo(0, topHeight));
 
             if (mListener != null) {
                 mListener.onWeekChange(mCurrentWeekIndex);

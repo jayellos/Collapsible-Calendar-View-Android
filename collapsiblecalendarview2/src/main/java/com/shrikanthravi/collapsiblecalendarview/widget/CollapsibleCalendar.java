@@ -62,10 +62,7 @@ public class CollapsibleCalendar extends UICalendar {
     protected void init(Context context) {
         super.init(context);
 
-
-        int size = getEventDotSize();
         CalendarAdapter adapter = new CalendarAdapter(context);
-        adapter.setEventDotSize(getEventDotSize());
         setAdapter(adapter);
 
 
@@ -167,7 +164,6 @@ public class CollapsibleCalendar extends UICalendar {
                 // TODO [Jay]: here is the bug
                 // set today's item
                 if (isToady(day)) {
-                    Log.e("jay", "istOday:" + day);
                     txtDay.setBackgroundDrawable(getTodayItemBackgroundDrawable());
                     txtDay.setTextColor(getTodayItemTextColor());
                 }
@@ -184,7 +180,6 @@ public class CollapsibleCalendar extends UICalendar {
     @Override
     protected void reload() {
         if (mAdapter != null) {
-            mAdapter.setEventDotSize(getEventDotSize());
             mAdapter.refresh();
 
             // reset UI
@@ -416,8 +411,8 @@ public class CollapsibleCalendar extends UICalendar {
             setState(STATE_PROCESSING);
 
             if (showNav) {
-                mLayoutBtnGroupMonth.setVisibility(GONE);
-                mLayoutBtnGroupWeek.setVisibility(VISIBLE);
+//                mLayoutBtnGroupMonth.setVisibility(GONE);
+//                mLayoutBtnGroupWeek.setVisibility(VISIBLE);
                 mBtnPrevWeek.setClickable(false);
                 mBtnNextWeek.setClickable(false);
             }
@@ -507,8 +502,8 @@ public class CollapsibleCalendar extends UICalendar {
             setState(STATE_PROCESSING);
 
             if (showNav) {
-                mLayoutBtnGroupMonth.setVisibility(VISIBLE);
-                mLayoutBtnGroupWeek.setVisibility(GONE);
+//                mLayoutBtnGroupMonth.setVisibility(VISIBLE);
+//                mLayoutBtnGroupWeek.setVisibility(GONE);
                 mBtnPrevMonth.setClickable(false);
                 mBtnNextMonth.setClickable(false);
             }

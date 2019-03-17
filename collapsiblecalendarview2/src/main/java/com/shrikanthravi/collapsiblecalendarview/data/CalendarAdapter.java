@@ -31,7 +31,7 @@ public class CalendarAdapter {
     private DayOfWeek mFirstDayOfWeek = DayOfWeek.SUNDAY;
     private LocalDate mCal;
     private LayoutInflater mInflater;
-    private int mEventDotSize = UICalendar.EVENT_DOT_BIG;
+    private int mEventDotSize = UICalendar.EVENT_DOT_SMALL;
 
     private List<LocalDate> mItemList = new ArrayList<>();
     private List<View> mViewList = new ArrayList<>();
@@ -74,10 +74,6 @@ public class CalendarAdapter {
 
     public void setFirstDayOfWeek(DayOfWeek firstDayOfWeek) {
         mFirstDayOfWeek = firstDayOfWeek;
-    }
-
-    public void setEventDotSize(int eventDotSize) {
-        mEventDotSize = eventDotSize;
     }
 
     public LocalDate getCalendar() {
